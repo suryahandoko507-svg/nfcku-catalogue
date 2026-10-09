@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFCku - Kartu NFC dan QR untuk ulasan Google</title>
+<meta name="description" content="Kartu akrilik NFC dan QR untuk toko dan UMKM. Tap atau scan, halaman ulasan Google langsung terbuka. Tanpa aplikasi.">
+<meta name="theme-color" content="#0b1f4d">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Nunito:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b1f4d;--blue:#0a66f0;--ice:#eef4ff;--ink:#0f172a;--mute:#52607a;--gold:#fbbf24;--line:#dbe4f5}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:17px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink);background:#fff}
+a{color:inherit}img{display:block}
+.w{max-width:1040px;margin:0 auto;padding:0 20px}
+h1,h2,h3{line-height:1.15;margin:0}
+h2{font-size:clamp(1.7rem,4.5vw,2.4rem);font-weight:800;letter-spacing:-.02em}
+.btn{display:inline-block;padding:13px 22px;border-radius:12px;font-weight:700;text-decoration:none;background:var(--blue);color:#fff;transition:transform .15s,background .15s}
+.btn:hover{background:#0953c4;transform:translateY(-1px)}
+.btn.ghost{background:transparent;border:1.5px solid rgba(255,255,255,.45)}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn.line{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+/* progress + nav */
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--gold);z-index:60}
+nav{position:sticky;top:0;z-index:50;background:rgba(11,31,77,.92);backdrop-filter:blur(8px);color:#fff}
+nav .w{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{height:34px;width:auto;filter:brightness(0) invert(1)}
+.wm{font:900 1.25rem Nunito,sans-serif;letter-spacing:-.01em}
+nav .links{margin-left:auto;display:flex;gap:22px;font-size:.95rem}
+nav .links a{text-decoration:none;opacity:.85}nav .links a:hover{opacity:1}
+nav .btn{padding:9px 16px;font-size:.92rem}
+@media(max-width:760px){nav .links{display:none}nav .btn{margin-left:auto}}
+/* hero */
+.hero{background:var(--navy);color:#fff;overflow:hidden}
+.hero .w{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding-top:56px;padding-bottom:72px}
+.hero h1{font-size:clamp(2.1rem,6vw,3.5rem);font-weight:800;letter-spacing:-.03em}
+.hero p{color:#c4d2f2;max-width:30em;margin:16px 0 26px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px}
+.hero small{display:block;margin-top:18px;color:#8fa4d6}
+@media(max-width:820px){.hero .w{grid-template-columns:1fr}}
+.stage{position:relative;display:grid;place-items:center;min-height:330px}
+.card{width:min(270px,70vw);aspect-ratio:1;border-radius:22px;background:linear-gradient(#050b6e,#2b3aa8 48%,#f7f9ff 48%);box-shadow:0 30px 60px rgba(0,0,0,.4);position:relative;transform:rotate(-5deg);animation:float 5s ease-in-out infinite;will-change:transform}
+.card .st{position:absolute;top:13%;width:100%;text-align:center;color:var(--gold);letter-spacing:4px}
+.card .pill{position:absolute;left:9%;right:9%;top:57%;background:#5468d4;color:#fff;border-radius:9px;font-size:.62rem;font-weight:800;text-align:center;padding:4px 0}
+.card .ring{position:absolute;left:11%;bottom:9%;width:34%;aspect-ratio:1;border:4px solid #111;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;color:#111}
+.card .qr{position:absolute;right:11%;bottom:9%;width:30%;aspect-ratio:1;background:conic-gradient(#111 25%,#fff 0 50%,#111 0 75%,#fff 0) 0 0/20% 20%;border:3px solid #fff;outline:2px solid #111}
+.wave{position:absolute;left:11%;bottom:9%;width:34%;aspect-ratio:1;border-radius:50%;border:2px solid var(--gold);opacity:0;animation:ping 2.8s ease-out infinite}
+.wave:nth-of-type(2){animation-delay:.9s}
+.phone{position:absolute;left:2%;bottom:-6%;width:84px;height:150px;border-radius:16px;background:#fff;border:5px solid #1b2c63;transform:rotate(14deg);animation:tap 2.8s ease-in-out infinite}
+.phone:after{content:"";position:absolute;top:8px;left:50%;width:26px;height:4px;margin-left:-13px;border-radius:3px;background:#c9d4ef}
+@keyframes float{50%{transform:rotate(-3deg) translateY(-8px)}}
+@keyframes ping{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.1);opacity:0}}
+@keyframes tap{0%,100%{transform:translate(-30px,-6px) rotate(14deg)}45%,60%{transform:translate(52px,-86px) rotate(14deg)}}
+/* sections */
+section{padding:72px 0}
+.alt{background:var(--ice)}
+.lead{color:var(--mute);max-width:36em;margin:10px 0 0}
+/* langkah: garis terisi saat scroll */
+.steps{position:relative;margin-top:40px;display:grid;gap:26px}
+.steps:before,.steps i{content:"";position:absolute;left:19px;top:8px;bottom:8px;width:3px;background:var(--line);border-radius:3px}
+.steps i{background:var(--blue);height:var(--p,0%);bottom:auto;transition:height .1s linear}
+.step{position:relative;padding-left:62px;opacity:.45;transition:opacity .4s}
+.step.on{opacity:1}
+.step b{position:absolute;left:0;top:0;width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid var(--line);display:grid;place-items:center;font-weight:800;color:var(--mute);transition:.4s}
+.step.on b{background:var(--blue);border-color:var(--blue);color:#fff}
+.step h3{font-size:1.15rem;margin-bottom:4px}.step p{margin:0;color:var(--mute)}
+/* fitur */
+.grid{display:grid;gap:18px;margin-top:34px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.f{padding:22px;border-radius:16px;background:#fff;border:1px solid var(--line)}
+.f h3{font-size:1.05rem;margin-bottom:6px}.f p{margin:0;color:var(--mute);font-size:.96rem}
+/* paket */
+.plan{padding:26px;border-radius:18px;background:#fff;border:1.5px solid var(--line)}
+.plan.hot{border-color:var(--blue);box-shadow:0 14px 40px rgba(10,102,240,.14)}
+.plan h3{font-size:1.25rem}.price{font-size:1.5rem;font-weight:800;margin:6px 0 14px;color:var(--blue)}
+.plan ul{margin:0 0 20px;padding-left:20px;color:var(--mute)}.plan li{margin:5px 0}
+.info{margin-top:26px;padding:18px 22px;border-radius:14px;background:var(--navy);color:#dbe6ff;font-size:.96rem}
+.info b{color:#fff}
+.ord{margin:30px 0 0;padding-left:22px}.ord li{margin:6px 0}
+/* segera */
+.soon{border-style:dashed;background:transparent}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#fff3cf;color:#8a5a00;margin-bottom:10px}
+.f a.t{display:inline-block;margin-top:12px;color:var(--blue);font-weight:700}
+/* faq */
+details{border-bottom:1px solid var(--line);padding:16px 0}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";font-size:1.4rem;line-height:1;color:var(--blue);transition:transform .25s}
+details[open] summary:after{transform:rotate(45deg)}
+details p{margin:10px 0 0;color:var(--mute);animation:fade .35s}
+@keyframes fade{from{opacity:0;transform:translateY(-4px)}}
+/* footer */
+footer{background:var(--navy);color:#c4d2f2;padding:56px 0 90px}
+footer .brand img{filter:brightness(0) invert(1)}
+footer .row{display:flex;flex-wrap:wrap;gap:16px 28px;margin-top:16px}
+footer a{color:#fff}
+.fab{position:fixed;right:16px;bottom:16px;z-index:55;background:#25d366;color:#06361b;font-weight:800;text-decoration:none;padding:13px 18px;border-radius:99px;box-shadow:0 10px 26px rgba(0,0,0,.25);transform:translateY(90px);transition:transform .35s}
+.fab.show{transform:none}
+/* muncul saat scroll: hanya bagian bawah hero */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s,transform .6s}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}.step{opacity:1}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav><div class="w">
+  <a class="brand" href="#"><img class="lg" alt="" height="34"><span class="wm">NFCku.my.id</span></a>
+  <div class="links"><a href="#cara">Cara kerja</a><a href="#paket">Paket</a><a href="#faq">FAQ</a></div>
+  <a class="btn" data-wa="Halo NFCku, saya mau pesan kartu NFC Google Review.">Pesan</a>
+</div></nav>
+
+<header class="hero"><div class="w">
+  <div>
+    <h1>Satu tap, ulasan Google toko langsung terbuka</h1>
+    <p>Kartu akrilik NFC dan QR untuk toko dan UMKM. Pelanggan tinggal tempel HP atau scan, tanpa aplikasi.</p>
+    <div class="cta">
+      <a class="btn" data-wa="Halo NFCku, saya mau pesan kartu NFC Google Review.">Pesan lewat WhatsApp</a>
+      <a class="btn ghost" id="demo" hidden>Coba demo</a>
+      <a class="btn ghost" href="#cara">Lihat cara kerja</a>
+    </div>
+    <small>Dikirim ke seluruh Indonesia. Pre-order 3 hari.</small>
+  </div>
+  <div class="stage" id="stage">
+    <div class="card" id="card">
+      <div class="st">★★★★★</div><div class="pill">BERIKAN ULASAN ANDA DI SINI</div>
+      <i class="wave"></i><i class="wave"></i><div class="ring">NFC</div><div class="qr"></div>
+    </div>
+    <div class="phone"></div>
+  </div>
+</div></header>
+
+<section id="cara"><div class="w">
+  <h2>Cara kerjanya</h2>
+  <p class="lead">Tiga langkah, selesai dalam hitungan detik.</p>
+  <div class="steps" id="steps"><i></i>
+    <div class="step"><b>1</b><h3>Tap atau scan</h3><p>Pelanggan menempelkan HP ke kartu, atau scan QR di sampingnya.</p></div>
+    <div class="step"><b>2</b><h3>Pilih bintang</h3><p>Halaman penilaian terbuka di HP pelanggan. Tidak perlu install aplikasi.</p></div>
+    <div class="step"><b>3</b><h3>Tulis ulasan</h3><p>Bintang tinggi langsung ke kolom ulasan Google toko. Punya masukan? Bisa dikirim langsung ke WhatsApp pemilik.</p></div>
+  </div>
+</div></section>
+
+<section class="alt"><div class="w">
+  <h2>Kenapa kartu ini</h2>
+  <div class="grid">
+    <div class="f rv"><h3>Akrilik UV print</h3><p>Kokoh dan terlihat premium di meja kasir. Ukuran 10 x 10 cm.</p></div>
+    <div class="f rv"><h3>Tujuan bisa diganti</h3><p>Pindah alamat atau ganti akun Google? Ubah tujuannya tanpa cetak ulang.</p></div>
+    <div class="f rv"><h3>Masukan ke WhatsApp</h3><p>Fitur opsional: pelanggan bisa menyampaikan masukan langsung ke pemilik.</p></div>
+    <div class="f rv"><h3>NFC dan QR</h3><p>HP tanpa NFC tetap bisa scan QR. Semua jalur mengarah ke tempat yang sama.</p></div>
+    <div class="f rv"><h3>Tanpa biaya langganan</h3><p>Beli kartunya, langsung pakai. Tidak ada tagihan bulanan untuk pembeli.</p></div>
+    <div class="f rv"><h3>Garansi ganti baru</h3><p>Kartu rusak, kami kirim yang baru.</p></div>
+  </div>
+</div></section>
+
+<section id="paket"><div class="w">
+  <h2>Paket</h2>
+  <p class="lead">Harga segera diumumkan. Tanya langsung lewat WhatsApp untuk penawaran terbaru.</p>
+  <div class="grid">
+    <div class="plan rv"><h3>Standar</h3><div class="price">Tanya harga</div>
+      <ul><li>Akrilik UV print 10 x 10 cm</li><li>Chip NFC dan QR</li><li>Desain template NFCku</li><li>Kartu diaktifkan sebelum dikirim</li></ul>
+      <a class="btn line" data-wa="Halo NFCku, saya tertarik paket Standar. Boleh tahu harganya?">Tanya paket Standar</a></div>
+    <div class="plan hot rv"><h3>Kustom</h3><div class="price">Tanya harga</div>
+      <ul><li>Semua isi paket Standar</li><li>Logo dan nama usaha di kartu</li><li>Cocok untuk branding toko</li></ul>
+      <a class="btn" data-wa="Halo NFCku, saya tertarik paket Kustom dengan logo dan nama usaha. Boleh tahu harganya?">Tanya paket Kustom</a></div>
+  </div>
+  <div class="info rv"><b>Pre-order 3 hari.</b> Tanpa minimal order. Pembayaran lewat transfer dan QRIS. Kartu rusak diganti yang baru.</div>
+  <ol class="ord rv"><li>Kirim data lewat WhatsApp: nama toko, logo (paket Kustom), link Google Maps toko, dan nomor WhatsApp pemilik.</li><li>Kami buat dan aktifkan kartunya dalam 3 hari.</li><li>Kartu dikirim. Begitu sampai, tinggal ditempel di meja kasir.</li></ol>
+</div></section>
+
+<section class="alt"><div class="w">
+  <h2>Segera hadir</h2>
+  <p class="lead">Fitur NFC lain untuk UMKM sedang disiapkan.</p>
+  <div class="grid">
+    <div class="f soon rv"><span class="tag">Segera hadir</span><h3>Kartu TikTok dan media sosial</h3><p>Satu tap membuka profil TikTok atau Instagram tokomu.</p><a class="t" data-wa="Halo NFCku, kabari saya kalau kartu media sosial sudah tersedia.">Kabari saya</a></div>
+    <div class="f soon rv"><span class="tag">Segera hadir</span><h3>Menu digital UMKM</h3><p>Pelanggan tap, daftar menu dan harga langsung terbuka.</p><a class="t" data-wa="Halo NFCku, kabari saya kalau menu digital sudah tersedia.">Kabari saya</a></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="w">
+  <h2>Pertanyaan yang sering muncul</h2>
+  <div style="margin-top:24px;max-width:46em">
+    <details><summary>Cara aktivasinya gimana?</summary><p>Kirim link Google Maps toko saat memesan. Kami aktifkan kartunya sebelum dikirim, jadi begitu sampai langsung bisa dipakai. Link untuk mengubah tujuan dan kode rahasianya kami kirim lewat WhatsApp.</p></details>
+    <details><summary>Gimana cara menggunakannya?</summary><p>Pelanggan menempelkan HP ke kartu atau scan QR. Halaman penilaian terbuka, lalu pelanggan memilih bintang dan menulis ulasan.</p></details>
+    <details><summary>Bisa dipakai di Android dan iPhone?</summary><p>Bisa. Di Android, nyalakan NFC di pengaturan. iPhone XR, XS, dan yang lebih baru bisa membaca NFC langsung tanpa aplikasi. Untuk iPhone lama atau HP tanpa NFC, pakai QR: semua HP dengan kamera bisa scan.</p></details>
+    <details><summary>Perlu install aplikasi?</summary><p>Tidak. Cukup kamera atau NFC bawaan HP.</p></details>
+    <details><summary>Bisa ganti tujuan link nanti?</summary><p>Bisa. Tujuan diubah lewat halaman edit dengan kode rahasia, tanpa cetak ulang kartu.</p></details>
+    <details><summary>Kalau kartunya rusak?</summary><p>Kami kirim kartu yang baru.</p></details>
+    <details><summary>Bayarnya gimana, dan berapa lama?</summary><p>Transfer atau QRIS. Pengerjaan pre-order 3 hari, dan tidak ada minimal order.</p></details>
+  </div>
+</div></section>
+
+<footer><div class="w">
+  <a class="brand" href="#"><img class="lg" alt="" height="34"><span class="wm">NFCku.my.id</span></a>
+  <p style="margin:12px 0 0">Fitur NFC pintar untuk UMKM.</p>
+  <div class="row"><a data-wa="Halo NFCku, saya mau tanya soal kartu NFC.">WhatsApp</a><a id="ig" target="_blank" rel="noopener">Instagram</a></div>
+  <p style="margin:26px 0 0;font-size:.85rem;color:#8fa4d6">&copy; 2026 NFCku.my.id</p>
+</div></footer>
+<a class="fab" id="fab" data-wa="Halo NFCku, saya mau tanya soal kartu NFC.">Chat WhatsApp</a>
+
+<script>
+/* ===== Ubah di sini ===== */
+const WA = "6282166366174";
+const IG = "nfcku.my.id";
+const DEMO_URL = "";   // isi dengan link kartu demo, contoh: https://review.nfcku.my.id/c/DEMO
+const LOGO = "data:image/png;base64,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";
+/* ======================== */
+document.querySelectorAll("[data-wa]").forEach(a=>{a.href="https://wa.me/"+WA+"?text="+encodeURIComponent(a.dataset.wa);a.target="_blank";a.rel="noopener"});
+document.getElementById("ig").href="https://instagram.com/"+IG;
+document.querySelectorAll(".lg").forEach(i=>i.src=LOGO);
+const ic=document.createElement("link");ic.rel="icon";ic.href=LOGO;document.head.appendChild(ic);
+if(DEMO_URL){const d=document.getElementById("demo");d.href=DEMO_URL;d.hidden=false}
+const bar=document.getElementById("bar"),fab=document.getElementById("fab"),steps=document.getElementById("steps"),card=document.getElementById("card"),st=[...document.querySelectorAll(".step")];
+const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function onScroll(){
+  const y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+  bar.style.width=(h>0?y/h*100:0)+"%";
+  fab.classList.toggle("show",y>500);
+  const r=steps.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight*.6-r.top)/r.height));
+  steps.style.setProperty("--p",p*100+"%");
+  st.forEach((s,i)=>s.classList.toggle("on",p>=i/st.length+.02));
+  if(!calm&&y<innerHeight)card.style.marginTop=(y*.12)+"px";
+}
+addEventListener("scroll",onScroll,{passive:true});onScroll();
+const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in");io.unobserve(x.target)}}),{threshold:.15});
+document.querySelectorAll(".rv").forEach((el,i)=>{el.style.transitionDelay=(i%3)*90+"ms";io.observe(el)});
+</script>
+</body>
+</html>
